@@ -62,4 +62,121 @@ struct ClassFile {
     u2 attributes_count;
     AttributeInfo *attributes;
 }__attribute__ ((packed));
+struct File{
+    const char *file_path;
+    char *content;
+    long size;
+};
+#define CLASS_READ_U4(s, p)                             \
+        do {                                            \
+                s = (((p >> 24) & 0x000000ff) |         \
+                        ((p >> 8) & 0x0000ff00) |       \
+                        ((p << 24) & 0xff000000) |      \
+                        ((p << 8) & 0x00ff0000));       \
+        } while (0);
+
+#define CLASS_READ_U2(s, p)                             \
+        do {                                            \
+                s = (((p >> 8) & 0x00ff) |              \
+                        ((p << 8) & 0xff00));           \
+        } while (0);
+
+#define CLASS_READ_U1(s, p)                             \
+        do {                                            \
+                s = p;                                  \
+        } while (0);
+
+#define CONSTANT_Class                                  7
+#define CONSTANT_Fieldref                               9
+#define CONSTANT_Methodref                              10
+#define CONSTANT_InterfaceMethodref                     11
+#define CONSTANT_String                                 8
+#define CONSTANT_Integer                                3
+#define CONSTANT_Float                                  4
+#define CONSTANT_Long                                   5
+#define CONSTANT_Double                                 6
+#define CONSTANT_NameAndType                            12
+#define CONSTANT_Utf8                                   1
+#define CONSTANT_MethodHandle                           15
+#define CONSTANT_MethodType                             16
+#define CONSTANT_InvokeDynamic                          18
+
+struct CONSTANT_Class_info {
+    //u1 tag;
+    u2 name_index;
+}__attribute__ ((packed));
+
+struct CONSTANT_Fieldref_info {
+    //u1 tag;
+    u2 class_index;
+    u2 name_and_type_index;
+}__attribute__ ((packed));
+
+struct CONSTANT_Methodref_info {
+    //u1 tag;
+    u2 class_index;
+    u2 name_and_type_index;
+}__attribute__ ((packed));
+
+struct CONSTANT_InterfaceMethodref_info {
+    //u1 tag;
+    u2 class_index;
+    u2 name_and_type_inex;
+}__attribute__ ((packed));
+
+struct CONSTANT_String_info {
+    //u1 tag;
+    u2 string_index;
+}__attribute__ ((packed));
+
+struct CONSTANT_Integer_info {
+    //u1 tag;
+    u4 bytes;
+}__attribute__ ((packed));
+
+struct CONSTANT_Float_info {
+    //u1 tag;
+    u4 bytes;
+}__attribute__ ((packed));
+
+struct CONSTANT_Long_info {
+    //u1 tag;
+    u4 high_bytes;
+    u4 low_bytes;
+}__attribute__ ((packed));
+
+struct CONSTANT_Double_info {
+    //u1 tag;
+    u4 high_bytes;
+    u4 low_bytes;
+}__attribute__ ((packed));
+
+struct CONSTANT_NameAndType_info {
+    //u1 tag;
+    u2 name_index;
+    u2 descriptor_index;
+}__attribute__ ((packed));
+
+struct CONSTANT_Utf8_info {
+    //u1 tag;
+    u2 length;
+    u1 bytes[];
+}__attribute__ ((packed));
+
+struct CONSTANT_MethodHandle_info {
+    //u1 tag;
+    u1 reference_kind;
+    u2 reference_index;
+}__attribute__ ((packed));
+
+struct CONSTANT_MethodType_info {
+    //u1 tag;
+    u2 descriptor_index;
+}__attribute__ ((packed));
+
+struct CONSTANT_InvokeDynamic_info {
+    //u1 tag;
+    u2 bootstrap_method_attr_index;
+    u2 name_and_type_index;
+}__attribute__ ((packed));
 #endif
