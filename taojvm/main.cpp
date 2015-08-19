@@ -10,8 +10,8 @@
 #include <fstream>
 #include "jvm.h"
 using namespace std;
-const char* FILE_PATH = "/Users/yintao/Desktop/深入java虚拟机/applets/GettingLoaded/Act.class";
-
+const char* FILE_PATH = "D:\\git\\jvm\\taojvm\\Act.class";
+//const char* FILE_PATH = "/Users/yintao/Desktop/深入java虚拟机/applets/GettingLoaded/Act.class";
 void read(ifstream* fin,char* address,int size){
     for(int i =size-1;i>=0;i--){
         (*fin).read(&address[i],1);
@@ -47,7 +47,7 @@ int main(int argc, const char * argv[]) {
         std::cout<<"right";
     }
     std::cout<<sizeof(tag);
-    ConstantInfo ci;
+    ConstantInfoSt ci;
     ci.index =const_pool_count;
     ci.base = new CpInfo[const_pool_count-1];
     return 0;
