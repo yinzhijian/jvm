@@ -16,9 +16,31 @@ typedef unsigned long u8;
 typedef unsigned long long u8;
 #endif
 
+#define ACC_PUBLIC                                      0x0001
+#define ACC_FINAL                                       0x0010
+#define ACC_SUPER                                       0x0020
+#define ACC_INTERFACE                                   0x0200
+#define ACC_ABSTRACT                                    0X0400
+#define ACC_SYNTHETIC                                   0x1000
+#define ACC_ANNOTATION                                  0x2000
+#define ACC_ENUM                                        0x4000
+
+#define METHOD_ACC_PUBLIC                               0x0001
+#define METHOD_ACC_PRIVATE                              0x0002
+#define METHOD_ACC_PROTECTED                            0x0004
+#define METHOD_ACC_STATIC                               0x0008
+#define METHOD_ACC_FINAL                                0x0010
+#define METHOD_ACC_SYNCHRONIED                          0x0020
+#define METHOD_ACC_BRIDGE                               0x0040
+#define METHOD_ACC_VARARGS                              0x0080
+#define METHOD_ACC_NATIVE                               0x0100
+#define METHOD_ACC_ABSTRACT                             0x0400
+#define METHOD_ACC_STRICT                               0x0800
+#define METHOD_ACC_SYNTHETIC                            0x1000
+
 struct CpInfo {
     u1 tag;
-    u1 info[];
+    u1 *info;
 }__attribute__ ((packed));
 
 struct ConstantInfoSt {
@@ -85,8 +107,23 @@ struct File{
         do {                                            \
                 s = p;                                  \
         } while (0);
-
-#define CONSTANT_Class                                  7
+enum CLASS_FILE_CONSTANT_TAG{
+    CONSTANT_Class = 7,
+    CONSTANT_Fieldref = 9,
+    CONSTANT_Methodref = 10,
+    CONSTANT_InterfaceMethodref = 11,
+    CONSTANT_String = 8,
+    CONSTANT_Integer = 3,
+    CONSTANT_Float = 4,
+    CONSTANT_Long  = 5,
+    CONSTANT_Double = 6,
+    CONSTANT_NameAndType=12,
+    CONSTANT_Utf8 =1,
+    CONSTANT_MethodHandle=15,
+    CONSTANT_MethodType =16,
+    CONSTANT_InvokeDynamic =18
+};
+/*#define CONSTANT_Class                                  7
 #define CONSTANT_Fieldref                               9
 #define CONSTANT_Methodref                              10
 #define CONSTANT_InterfaceMethodref                     11
@@ -99,8 +136,7 @@ struct File{
 #define CONSTANT_Utf8                                   1
 #define CONSTANT_MethodHandle                           15
 #define CONSTANT_MethodType                             16
-#define CONSTANT_InvokeDynamic                          18
-
+#define CONSTANT_InvokeDynamic                          18*/
 struct CONSTANT_Class_info {
     //u1 tag;
     u2 name_index;
@@ -160,7 +196,7 @@ struct CONSTANT_NameAndType_info {
 struct CONSTANT_Utf8_info {
     //u1 tag;
     u2 length;
-    u1 bytes[];
+    u1 *bytes;
 }__attribute__ ((packed));
 
 struct CONSTANT_MethodHandle_info {
