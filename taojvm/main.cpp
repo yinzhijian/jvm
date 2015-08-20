@@ -14,8 +14,9 @@
 using namespace std;
 //const char* FILE_PATH = "D:\\git\\jvm\\taojvm\\Act.class";
 //const char* FILE_PATH = "D:\\workspace\\untitled\\out\\production\\untitled\\Test.class";
-const char* FILE_PATH = "C:\\Users\\yintao\\Desktop\\deepjvm\\classlife\\ex8\\MyThread.class";
+//const char* FILE_PATH = "C:\\Users\\yintao\\Desktop\\deepjvm\\classlife\\ex8\\MyThread.class";
 //const char* FILE_PATH = "/Users/yintao/Desktop/深入java虚拟机/applets/GettingLoaded/Act.class";
+const char* FILE_PATH = "/Users/yintao/Documents/workspace/untitled/out/production/untitled/Main.class";
 u1* fileContent;
 File file;
 ClassFile classFile;
@@ -55,6 +56,7 @@ const char* constantTranslate(CLASS_FILE_CONSTANT_TAG class_file_constant){
 }
 const char* accessFlagsTranslate(u2 accessFlags){
     string out;
+    out.clear();
     if(accessFlags & ACC_PUBLIC){
         out+="ACC_PUBLIC ";
     }
@@ -218,6 +220,23 @@ void paresInterface(ClassFile &classFile,char* &startIndex){
         cout<<"null"<<endl;
     }
 }
+void parseAttribute(AttributeInfo *attributes ,u2 &attributes_count,char* &startIndex){
+    CLASS_READ_U2(attributes_count,*(u2 *)startIndex);
+    startIndex+=2;
+    cout<<"attributes_count:"<<attributes_count<<endl;
+    attributes = new AttributeInfo[attributes_count];
+    for(int i=0;i<attributes_count;i++ ){
+        CLASS_READ_U2(attributes[i].attribute_name_index,*(u2 *)startIndex);
+        cout<<"#"<<i<< " = attribute_name_index:"<<attributes[i].attribute_name_index<<endl;
+        startIndex+=2;
+        CLASS_READ_U4(attributes[i].attribute_length,*(u4 *)startIndex);
+        cout<<"#"<<i<< " = attribute_length:"<<attributes[i].attribute_length<<endl;
+        startIndex+=4;
+        attributes[i].info = (u1 *)startIndex;
+        startIndex+=attributes[i].attribute_length;
+    }
+
+}
 void parseField(ClassFile &classFile,char* &startIndex){
     CLASS_READ_U2(classFile.fields_count,*(u2 *)startIndex);
     startIndex+=2;
@@ -229,21 +248,50 @@ void parseField(ClassFile &classFile,char* &startIndex){
             cout<<"#"<<i<<" = ";
             CLASS_READ_U2(fieldInfo[i].access_flags,*(u2 *)startIndex);
             startIndex+=2;
-            cout<<"access_flags:"<<accessFlagsTranslate(fieldInfo[i].access_flags)<<" ";
+            printf("access_flags: %s",accessFlagsTranslate(fieldInfo[i].access_flags));
+            //cout<<"access_flags:"<<accessFlagsTranslate(fieldInfo[i].access_flags)<<" ";
             CLASS_READ_U2(fieldInfo[i].name_index,*(u2 *)startIndex);
             startIndex+=2;
             cout<<"name_index:"<<fieldInfo[i].name_index<<"";
             CLASS_READ_U2(fieldInfo[i].descriptor_index,*(u2 *)startIndex);
             startIndex+=2;
-            cout<<"descriptor_index:"<<fieldInfo[i].descriptor_index<<"";
-            CLASS_READ_U2(fieldInfo[i].attributes_count,*(u2 *)startIndex);
-            startIndex+=2;
-            cout<<"attributes_count:"<<fieldInfo[i].attributes_count<<"";
+            cout<<"descriptor_index:"<<fieldInfo[i].descriptor_index<<endl;
+            parseAttribute(fieldInfo[i].attributes,fieldInfo[i].attributes_count,startIndex);
+
         }
         classFile.fields= fieldInfo;
         cout<<endl;
     }else{
         classFile.fields = NULL;
+        cout<<"null"<<endl;
+    }
+}
+void parseMethod(ClassFile &classFile,char* &startIndex){
+    CLASS_READ_U2(classFile.methods_count,*(u2 *)startIndex);
+    startIndex+=2;
+    cout<<"methods_count:"<<classFile.methods_count<<endl;
+    cout<<"method_info:";
+    if(classFile.methods_count>0){
+        MethodInfo* methodInfo = new MethodInfo[classFile.methods_count];
+        for(int i=0;i<classFile.methods_count;i++){
+            cout<<"#"<<i<<" = ";
+            CLASS_READ_U2(methodInfo[i].access_flags,*(u2 *)startIndex);
+            startIndex+=2;
+            printf("access_flags: %s",accessFlagsTranslate(methodInfo[i].access_flags));
+            //cout<<"access_flags:"<<accessFlagsTranslate(methodInfo[i].access_flags)<<" ";
+            CLASS_READ_U2(methodInfo[i].name_index,*(u2 *)startIndex);
+            startIndex+=2;
+            cout<<"name_index:"<<methodInfo[i].name_index<<"";
+            CLASS_READ_U2(methodInfo[i].descriptor_index,*(u2 *)startIndex);
+            startIndex+=2;
+            cout<<"descriptor_index:"<<methodInfo[i].descriptor_index<<endl;
+            parseAttribute(methodInfo[i].attributes,methodInfo[i].attributes_count,startIndex);
+
+        }
+        classFile.methods= methodInfo;
+        cout<<endl;
+    }else{
+        classFile.methods = NULL;
         cout<<"null"<<endl;
     }
 }
@@ -265,7 +313,7 @@ void parse(ClassFile &classFile,File file){
     parseConstantPool(classFile,startIndex);
     CLASS_READ_U2(classFile.access_flags,*(u2 *)startIndex);
     startIndex+=2;
-    cout<<"access_flags:"<<accessFlagsTranslate(classFile.access_flags)<<endl;
+    printf("access_flags: %s",accessFlagsTranslate(classFile.access_flags));
     CLASS_READ_U2(classFile.this_class,*(u2 *)startIndex);
     startIndex+=2;
     cout<<"this_class:"<<classFile.this_class<<endl;
@@ -273,6 +321,9 @@ void parse(ClassFile &classFile,File file){
     startIndex+=2;
     cout<<"super_class:"<<classFile.super_class<<endl;
     paresInterface(classFile,startIndex);
+    parseField(classFile,startIndex);
+    parseMethod(classFile,startIndex);
+    parseAttribute(classFile.attributes,classFile.attributes_count,startIndex);
 }
 //void read(ifstream ,char* ,int )；
 int main(int argc, const char * argv[]) {
