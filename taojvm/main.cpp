@@ -15,8 +15,8 @@ using namespace std;
 //const char* FILE_PATH = "D:\\git\\jvm\\taojvm\\Act.class";
 //const char* FILE_PATH = "D:\\workspace\\untitled\\out\\production\\untitled\\Test.class";
 //const char* FILE_PATH = "C:\\Users\\yintao\\Desktop\\deepjvm\\classlife\\ex8\\MyThread.class";
-//const char* FILE_PATH = "/Users/yintao/Desktop/深入java虚拟机/applets/GettingLoaded/Act.class";
-const char* FILE_PATH = "/Users/yintao/Documents/workspace/untitled/out/production/untitled/Main.class";
+const char* FILE_PATH = "/Users/yintao/Desktop/深入java虚拟机/applets/GettingLoaded/Act.class";
+//const char* FILE_PATH = "/Users/yintao/Documents/workspace/untitled/out/production/untitled/Main.class";
 u1* fileContent;
 File file;
 ClassFile classFile;
@@ -54,7 +54,7 @@ const char* constantTranslate(CLASS_FILE_CONSTANT_TAG class_file_constant){
             return "unknow constant";
     }
 }
-const char* accessFlagsTranslate(u2 accessFlags){
+const char* classAccessFlagsTranslate(u2 accessFlags){
     string out;
     out.clear();
     if(accessFlags & ACC_PUBLIC){
@@ -80,6 +80,79 @@ const char* accessFlagsTranslate(u2 accessFlags){
     }
     if(accessFlags & ACC_ENUM){
         out+="ACC_ENUM ";
+    }
+    return out.c_str();
+}
+const char* fieldAccessFlagsTranslate(u2 accessFlags){
+    string out;
+    out.clear();
+    if(accessFlags & FIELD_ACC_PUBLIC){
+        out+="FIELD_ACC_PUBLIC ";
+    }
+    if(accessFlags & FIELD_ACC_PRIVATE){
+        out+="FIELD_ACC_PRIVATE ";
+    }
+    if(accessFlags & FIELD_ACC_PROTECTED){
+        out+="FIELD_ACC_PROTECTED ";
+    }
+    if(accessFlags & FIELD_ACC_STATIC){
+        out+="FIELD_ACC_STATIC ";
+    }
+    if(accessFlags & FIELD_ACC_FINAL){
+        out+="FIELD_ACC_FINAL ";
+    }
+    if(accessFlags & FIELD_ACC_VOLATILE){
+        out+="FIELD_ACC_VOLATILE ";
+    }
+    if(accessFlags & FIELD_ACC_TRANSIENT){
+        out+="FIELD_ACC_TRANSIENT ";
+    }
+    if(accessFlags & FIELD_ACC_SYNTHETIC){
+        out+="FIELD_ACC_SYNTHETIC ";
+    }
+    if(accessFlags & FIELD_ACC_ENUM){
+        out+="FIELD_ACC_ENUM ";
+    }
+    return out.c_str();
+}
+const char* methodAccessFlagsTranslate(u2 accessFlags){
+    string out;
+    out.clear();
+    if(accessFlags & METHOD_ACC_PUBLIC){
+        out+="METHOD_ACC_PUBLIC ";
+    }
+    if(accessFlags & METHOD_ACC_PRIVATE){
+        out+="METHOD_ACC_PRIVATE ";
+    }
+    if(accessFlags & METHOD_ACC_PROTECTED){
+        out+="METHOD_ACC_PROTECTED ";
+    }
+    if(accessFlags & METHOD_ACC_STATIC){
+        out+="METHOD_ACC_STATIC ";
+    }
+    if(accessFlags & METHOD_ACC_FINAL){
+        out+="METHOD_ACC_FINAL ";
+    }
+    if(accessFlags & METHOD_ACC_SYNCHRONIED){
+        out+="METHOD_ACC_SYNCHRONIED ";
+    }
+    if(accessFlags & METHOD_ACC_BRIDGE){
+        out+="METHOD_ACC_BRIDGE ";
+    }
+    if(accessFlags & METHOD_ACC_VARARGS){
+        out+="METHOD_ACC_VARARGS ";
+    }
+    if(accessFlags & METHOD_ACC_NATIVE){
+        out+="METHOD_ACC_NATIVE ";
+    }
+    if(accessFlags & METHOD_ACC_ABSTRACT){
+        out+="METHOD_ACC_ABSTRACT ";
+    }
+    if(accessFlags & METHOD_ACC_STRICT){
+        out+="METHOD_ACC_STRICT ";
+    }
+    if(accessFlags & METHOD_ACC_SYNTHETIC){
+        out+="METHOD_ACC_SYNTHETIC ";
     }
     return out.c_str();
 }
@@ -220,7 +293,8 @@ void paresInterface(ClassFile &classFile,char* &startIndex){
         cout<<"null"<<endl;
     }
 }
-void parseAttribute(AttributeInfo *attributes ,u2 &attributes_count,char* &startIndex){
+u2 parseAttribute(AttributeInfo *attributes ,char* &startIndex){
+    u2 attributes_count;
     CLASS_READ_U2(attributes_count,*(u2 *)startIndex);
     startIndex+=2;
     cout<<"attributes_count:"<<attributes_count<<endl;
@@ -235,7 +309,7 @@ void parseAttribute(AttributeInfo *attributes ,u2 &attributes_count,char* &start
         attributes[i].info = (u1 *)startIndex;
         startIndex+=attributes[i].attribute_length;
     }
-
+    return attributes_count;
 }
 void parseField(ClassFile &classFile,char* &startIndex){
     CLASS_READ_U2(classFile.fields_count,*(u2 *)startIndex);
@@ -248,15 +322,14 @@ void parseField(ClassFile &classFile,char* &startIndex){
             cout<<"#"<<i<<" = ";
             CLASS_READ_U2(fieldInfo[i].access_flags,*(u2 *)startIndex);
             startIndex+=2;
-            printf("access_flags: %s",accessFlagsTranslate(fieldInfo[i].access_flags));
-            //cout<<"access_flags:"<<accessFlagsTranslate(fieldInfo[i].access_flags)<<" ";
+            printf("access_flags: %s",fieldAccessFlagsTranslate(fieldInfo[i].access_flags));
             CLASS_READ_U2(fieldInfo[i].name_index,*(u2 *)startIndex);
             startIndex+=2;
             cout<<"name_index:"<<fieldInfo[i].name_index<<"";
             CLASS_READ_U2(fieldInfo[i].descriptor_index,*(u2 *)startIndex);
             startIndex+=2;
             cout<<"descriptor_index:"<<fieldInfo[i].descriptor_index<<endl;
-            parseAttribute(fieldInfo[i].attributes,fieldInfo[i].attributes_count,startIndex);
+            fieldInfo[i].attributes_count = parseAttribute(fieldInfo[i].attributes,startIndex);
 
         }
         classFile.fields= fieldInfo;
@@ -277,15 +350,14 @@ void parseMethod(ClassFile &classFile,char* &startIndex){
             cout<<"#"<<i<<" = ";
             CLASS_READ_U2(methodInfo[i].access_flags,*(u2 *)startIndex);
             startIndex+=2;
-            printf("access_flags: %s",accessFlagsTranslate(methodInfo[i].access_flags));
-            //cout<<"access_flags:"<<accessFlagsTranslate(methodInfo[i].access_flags)<<" ";
+            printf("access_flags: %s",methodAccessFlagsTranslate(methodInfo[i].access_flags));
             CLASS_READ_U2(methodInfo[i].name_index,*(u2 *)startIndex);
             startIndex+=2;
             cout<<"name_index:"<<methodInfo[i].name_index<<"";
             CLASS_READ_U2(methodInfo[i].descriptor_index,*(u2 *)startIndex);
             startIndex+=2;
             cout<<"descriptor_index:"<<methodInfo[i].descriptor_index<<endl;
-            parseAttribute(methodInfo[i].attributes,methodInfo[i].attributes_count,startIndex);
+            methodInfo[i].attributes_count = parseAttribute(methodInfo[i].attributes,startIndex);
 
         }
         classFile.methods= methodInfo;
@@ -313,7 +385,7 @@ void parse(ClassFile &classFile,File file){
     parseConstantPool(classFile,startIndex);
     CLASS_READ_U2(classFile.access_flags,*(u2 *)startIndex);
     startIndex+=2;
-    printf("access_flags: %s",accessFlagsTranslate(classFile.access_flags));
+    printf("access_flags: %s",classAccessFlagsTranslate(classFile.access_flags));
     CLASS_READ_U2(classFile.this_class,*(u2 *)startIndex);
     startIndex+=2;
     cout<<"this_class:"<<classFile.this_class<<endl;
@@ -323,37 +395,11 @@ void parse(ClassFile &classFile,File file){
     paresInterface(classFile,startIndex);
     parseField(classFile,startIndex);
     parseMethod(classFile,startIndex);
-    parseAttribute(classFile.attributes,classFile.attributes_count,startIndex);
+    classFile.attributes_count = parseAttribute(classFile.attributes,startIndex);
 }
-//void read(ifstream ,char* ,int )；
 int main(int argc, const char * argv[]) {
     file.file_path = FILE_PATH;
     readFile(file);
     parse(classFile,file);
         return 0;
-    // insert code here...
-    u4 magic = -1;
-    u2 minorVersion  = -1;
-    u2 majorVersion  = -1;
-    u2 const_pool_count = -1;
-    u1 tag = -1;
-    u2 nameIndex = -1;
-    std::ifstream fin(FILE_PATH, std::ios::binary);
-
-    if(!fin.is_open()){
-        return -1;
-    }
-    fin.close();
-    std::cout << hex<<magic<<dec<<" minor:"<<minorVersion<<" major:"<<majorVersion<<endl;
-    std::cout << " const_pool_count:"<<const_pool_count<<" tag:"<<hex<<tag+0<<endl;
-    std::cout << "name_index:" <<nameIndex<<" :\u0777\u0777"<<endl;
-    printf("%d",tag);
-    if(magic == 0xbebafeca){
-        std::cout<<"right";
-    }
-    std::cout<<sizeof(tag);
-    ConstantInfoSt ci;
-    ci.index =const_pool_count;
-    ci.base = new CpInfo[const_pool_count-1];
-    return 0;
 }
