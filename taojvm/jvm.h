@@ -38,6 +38,32 @@ typedef unsigned long long u8;
 #define METHOD_ACC_STRICT                               0x0800
 #define METHOD_ACC_SYNTHETIC                            0x1000
 
+struct JvmStackFrame {
+
+    u1 *local_var_table;        // 本地变量表的指针
+
+    u1 *operand_stack;          // 操作数栈的指针
+
+    u4 *method;
+
+    u1 *return_addr;            // method调用函数的时候，保存的返回地址
+
+    u4 offset;                  // 操作数栈的偏移量
+
+    u2 max_stack;               // 本地变量表中的变量数量
+
+    u2 max_locals;              // 操作数栈的变量数量
+
+    struct jvm_stack_frame *prev_stack;    // 指向前一个栈帧结构
+
+};
+struct Method {
+    u1 *name;
+    u4 code_length;
+    u1 *code;
+    JvmStackFrame jvmStackFrame;
+};
+
 struct CpInfo {
     u1 tag;
     u1 *info;
@@ -80,11 +106,12 @@ struct ClassFile {
     u2 fields_count;
     FieldInfo *fields;
     u2 methods_count;
-    MethodInfo *methods;
+    //MethodInfo *methods;
+    Method *methods;
     u2 attributes_count;
     AttributeInfo *attributes;
 }__attribute__ ((packed));
-struct File{
+struct File {
     const char *file_path;
     char *content;
     long size;
@@ -107,7 +134,7 @@ struct File{
         do {                                            \
                 s = p;                                  \
         } while (0);
-enum CLASS_FILE_CONSTANT_TAG{
+enum CLASS_FILE_CONSTANT_TAG {
     CONSTANT_Class = 7,
     CONSTANT_Fieldref = 9,
     CONSTANT_Methodref = 10,
@@ -115,13 +142,13 @@ enum CLASS_FILE_CONSTANT_TAG{
     CONSTANT_String = 8,
     CONSTANT_Integer = 3,
     CONSTANT_Float = 4,
-    CONSTANT_Long  = 5,
+    CONSTANT_Long = 5,
     CONSTANT_Double = 6,
-    CONSTANT_NameAndType=12,
-    CONSTANT_Utf8 =1,
-    CONSTANT_MethodHandle=15,
-    CONSTANT_MethodType =16,
-    CONSTANT_InvokeDynamic =18
+    CONSTANT_NameAndType = 12,
+    CONSTANT_Utf8 = 1,
+    CONSTANT_MethodHandle = 15,
+    CONSTANT_MethodType = 16,
+    CONSTANT_InvokeDynamic = 18
 };
 /*#define CONSTANT_Class                                  7
 #define CONSTANT_Fieldref                               9
@@ -215,4 +242,25 @@ struct CONSTANT_InvokeDynamic_info {
     u2 bootstrap_method_attr_index;
     u2 name_and_type_index;
 }__attribute__ ((packed));
+
+struct ExceptionTable {
+    u2 start_pc;
+    u2 end_pc;
+    u2 handler_pc;
+    u2 catch_type;
+}__attribute__ ((packed));
+
+struct CodeAttribute {
+    u2 attribute_name_index;
+    u4 attribute_length;
+    u2 max_stack;
+    u2 max_locals;
+    u4 code_length;
+    u1 *code;
+    u2 exception_table_length;
+    ExceptionTable *exceptionTable;
+    u2 attributes_count;
+    AttributeInfo *attributes;
+}__attribute__ ((packed));
+
 #endif
