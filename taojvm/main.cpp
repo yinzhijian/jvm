@@ -12,10 +12,10 @@
 #include   <string>
 #include "jvm.h"
 using namespace std;
-//const char* FILE_PATH = "D:\\git\\jvm\\taojvm\\Act.class";
+const char* FILE_PATH = "D:\\git\\jvm\\taojvm\\Act.class";
 //const char* FILE_PATH = "D:\\workspace\\untitled\\out\\production\\untitled\\Test.class";
 //const char* FILE_PATH = "C:\\Users\\yintao\\Desktop\\deepjvm\\classlife\\ex8\\MyThread.class";
-const char* FILE_PATH = "/Users/yintao/Desktop/深入java虚拟机/applets/GettingLoaded/Act.class";
+//const char* FILE_PATH = "/Users/yintao/Desktop/深入java虚拟机/applets/GettingLoaded/Act.class";
 //const char* FILE_PATH = "/Users/yintao/Documents/workspace/untitled/out/production/untitled/Main.class";
 u1* fileContent;
 File file;
