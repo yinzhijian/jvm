@@ -5,6 +5,10 @@
 //  Created by yintao on 15/8/19.
 //  Copyright (c) 2015年 yintao. All rights reserved.
 //
+#include <vector>
+#include <string>
+
+using namespace std;
 #ifndef JVM_H
 #define JVM_H
 typedef unsigned int u4;
@@ -47,6 +51,37 @@ typedef unsigned long long u8;
 #define FIELD_ACC_TRANSIENT	0x0080
 #define FIELD_ACC_SYNTHETIC	0x1000
 #define FIELD_ACC_ENUM	0x4000
+struct Method;
+struct JvmStackFrame {
+
+    u4 *local_var_table;        // 本地变量表的指针
+
+    u4 *operand_stack;          // 操作数栈的指针
+
+    Method *method;
+
+    u2 return_addr;            // method调用函数的时候，保存的返回地址
+
+    u4 offset;                  // 操作数栈的偏移量
+
+    u2 max_stack;               // 本地变量表中的变量数量
+
+    u2 max_locals;              // 操作数栈的变量数量
+
+    JvmStackFrame *prev_stack;    // 指向前一个栈帧结构
+
+};
+struct Method {
+    u2 poolIndex;
+    u1 *name;
+    u4 code_length;
+    u1 *code;
+    u1 *descriptor;
+    vector<string> arguments;
+    string returnType;
+    JvmStackFrame *jvmStackFrame;
+};
+
 struct CpInfo {
     u1 tag;
     u1 *info;
@@ -89,7 +124,8 @@ struct ClassFile {
     u2 fields_count;
     FieldInfo *fields;
     u2 methods_count;
-    MethodInfo *methods;
+    //MethodInfo *methods;
+    Method *methods;
     u2 attributes_count;
     AttributeInfo *attributes;
 }__attribute__ ((packed));
@@ -210,4 +246,25 @@ struct CONSTANT_InvokeDynamic_info {
     u2 bootstrap_method_attr_index;
     u2 name_and_type_index;
 }__attribute__ ((packed));
+
+struct ExceptionTable {
+    u2 start_pc;
+    u2 end_pc;
+    u2 handler_pc;
+    u2 catch_type;
+}__attribute__ ((packed));
+
+struct CodeAttribute {
+    u2 attribute_name_index;
+    u4 attribute_length;
+    u2 max_stack;
+    u2 max_locals;
+    u4 code_length;
+    u1 *code;
+    u2 exception_table_length;
+    ExceptionTable *exceptionTable;
+    u2 attributes_count;
+    AttributeInfo *attributes;
+}__attribute__ ((packed));
+
 #endif

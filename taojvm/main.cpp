@@ -7,14 +7,13 @@
 //
 
 #include <iostream>
-#include <fstream>
-#include   <string.h>
-#include   <string>
 #include "jvm.h"
 #include "class_loader.h"
+#include "execution_engine.h"
+
 using namespace std;
 //const char* FILE_PATH = "D:\\git\\jvm\\taojvm\\Act.class";
-//const char* FILE_PATH = "D:\\workspace\\untitled\\out\\production\\untitled\\Test.class";
+//const char* FILE_PATH = "D:\\workspace\\untitled\\out\\production\\untitled\\Main.class";
 //const char* FILE_PATH = "C:\\Users\\yintao\\Desktop\\deepjvm\\classlife\\ex8\\MyThread.class";
 //const char* FILE_PATH = "/Users/yintao/Desktop/深入java虚拟机/applets/GettingLoaded/Act.class";
 const char* FILE_PATH = "/Users/yintao/Documents/workspace/untitled/out/production/untitled/Main.class";
@@ -24,33 +23,36 @@ ClassFile classFile;
 
 //void read(ifstream ,char* ,int )；
 int main(int argc, const char * argv[]) {
-    file.file_path = FILE_PATH;
-    readFile(file);
-    parse(classFile,file);
-        return 0;
-    // insert code here...
-    u4 magic = -1;
-    u2 minorVersion  = -1;
-    u2 majorVersion  = -1;
-    u2 const_pool_count = -1;
-    u1 tag = -1;
-    u2 nameIndex = -1;
-    std::ifstream fin(FILE_PATH, std::ios::binary);
-
-    if(!fin.is_open()){
+    ClassLoader *classLoader = new ClassLoader(FILE_PATH);
+    printf("qwe");
+    Runtime *runtime = new Runtime;
+    ClassFile *classFile = classLoader->getClassFile();
+    printf("rty");
+    // u2 thisClassIndex = *(u2 *)(classFile->constant_pool[(classFile->this_class)].info);
+    // printf("uio this%d,%d",classFile->this_class,thisClassIndex);
+    // printf("tag:%d",classFile->constant_pool[thisClassIndex].tag);
+    // printf("name %s",(const char *)((CONSTANT_Utf8_info *)(classFile->constant_pool[thisClassIndex].info))->bytes);
+    //string name((const char *)((CONSTANT_Utf8_info *)(classFile->constant_pool[thisClassIndex].info))->bytes);
+    printf("asdf");
+    runtime->classFiles["Main"] = *classFile;
+    printf("ghj");
+    runtime->currentClassFile = classFile;
+    runtime->currentMethod = NULL;
+    printf("kl;");
+    for (u2 mIndex = 0; mIndex < classFile->methods_count; mIndex++) {
+        if (!strcmp((const char *) classFile->methods[mIndex].name, "main")) {
+            runtime->currentMethod = &classFile->methods[mIndex];
+            cout << "found main method!";
+            break;
+        }
+    }
+    if (runtime->currentMethod == NULL) {
+        cerr << "not found main method!";
         return -1;
     }
-    fin.close();
-    std::cout << hex<<magic<<dec<<" minor:"<<minorVersion<<" major:"<<majorVersion<<endl;
-    std::cout << " const_pool_count:"<<const_pool_count<<" tag:"<<hex<<tag+0<<endl;
-    std::cout << "name_index:" <<nameIndex<<" :\u0777\u0777"<<endl;
-    printf("%d",tag);
-    if(magic == 0xbebafeca){
-        std::cout<<"right";
-    }
-    std::cout<<sizeof(tag);
-    ConstantInfoSt ci;
-    ci.index =const_pool_count;
-    ci.base = new CpInfo[const_pool_count-1];
+    runtime->pc = 0;
+    runtime->currentStackFrame = runtime->currentMethod->jvmStackFrame;
+    runtime->currentMethodDeep = 1;
+    new ExecutionEngine(runtime);
     return 0;
 }
